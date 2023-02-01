@@ -57,22 +57,18 @@ int main(int argc, char *argv[]) {
   float_bit16 tempshortarray[8] = {a};
 
   vec_int16 aa = *((vec_int16 *)&tempshortarray[0]);
-  vec_float32 *out1 = aiu_op_output_fp32;                       
-  vec_float32 *out2 = aiu_op_output_fp32 + 1;
+  vec_float32 *out = aiu_op_output_fp32;                       
 
   vec_float32 work_float_1;
-  vec_float32 work_float_2;
   // clang-format off
-  __asm volatile(".insn vrr,0xe60000000056,%[out1],%[in_vec],0,2,0,0    \n\t"
-                ".insn vrr,0xe6000000005E,%[out2],%[in_vec],0,2,0,0     \n\t"
-                : [ out1 ] "=&v"(work_float_1), [ out2 ] "=v"(work_float_2)
+  __asm volatile(".insn vrr,0xe60000000056,%[out],%[in_vec],0,2,0,0"
+                : [ out ] "=&v"(work_float_1)
                 : [ in_vec ] "v"(a));
   // clang-format on
 
-  *out1 = work_float_1;
-  *out2 = work_float_2;
+  *out = work_float_1;
 
-  float c = (*(uint32_float_u *)out1).f; /* return first value from vector output */
+  float c = (*(uint32_float_u *)out).f; /* return first value from vector output */
   printf("c: %f\n", c);
 
   return 1;
